@@ -1,5 +1,10 @@
 import { Observable } from 'rxjs';
-import { TriggerRequest, TriggerResponse } from 'src/types/wiphala';
+import {
+  SegueRequest,
+  SegueResponse,
+  TriggerRequest,
+  TriggerResponse,
+} from 'src/types/wiphala';
 
 /**
  * Interface representing the Wiphala service.
@@ -7,4 +12,5 @@ import { TriggerRequest, TriggerResponse } from 'src/types/wiphala';
  */
 export interface WiphalaService {
   trigger(data: TriggerRequest): Observable<TriggerResponse>;
+  segue(data: SegueRequest): Observable<SegueResponse>;
 }

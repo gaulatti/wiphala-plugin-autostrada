@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ClientsModule.registerAsync([
       {
         name: 'wiphala',
