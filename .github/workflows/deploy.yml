@@ -73,6 +73,7 @@ jobs:
             -e GRPC_PORT="${{ vars.GRPC_PORT }}" \
             -e ASSETS_BUCKET_NAME="${{ secrets.ASSETS_BUCKET_NAME }}" \
             -e WIPHALA_GRPC_URL="${{ secrets.WIPHALA_GRPC_URL }}" \
+            -e PAGE_SPEED_INSIGHTS_KEY="${{ secrets.PAGE_SPEED_INSIGHTS_KEY }}" \
             -e CONTAINERIZED=true \
             --restart=always \
             --log-driver=awslogs \

@@ -5,6 +5,7 @@ import { Logger } from 'src/decorators/logger.decorator';
 import { WiphalaService } from 'src/interfaces/wiphala.interface';
 import { JSONLogger } from 'src/utils/logger';
 import { WorkerRequest, WorkerResponse } from './types/worker';
+import { categories, runPageSpeedInsights, strategies } from './utils/psi';
 
 @Injectable()
 export class AppService {
@@ -43,18 +44,49 @@ export class AppService {
     return { success: true };
   }
 
-  collect(request: {
+  async collect(request: {
     name: string;
     playlist: { slug: string };
     context: { metadata: { url: string } };
   }) {
-    void firstValueFrom(
-      this.wiphalaService.segue({
-        slug: request.playlist.slug,
-        output: JSON.stringify([]),
-        operation: request.name,
-      }),
-    );
+    const { url } = request.context.metadata;
+    if (!url) {
+      throw new Error('URL is required in the event object.');
+    }
+    try {
+      const executions: Promise<string>[] = [];
+      for (const currentCategory of categories) {
+        for (const currentStrategy of strategies) {
+          executions.push(
+            runPageSpeedInsights(
+              request.playlist.slug,
+              url,
+              currentCategory,
+              currentStrategy,
+            ),
+          );
+        }
+      }
+
+      /**
+       * Run all the executions in parallel.
+       */
+      const results = await Promise.all(executions);
+
+      /**
+       * Deliver to Wiphala
+       */
+      const output = await firstValueFrom(
+        this.wiphalaService.segue({
+          slug: request.playlist.slug,
+          output: JSON.stringify(results),
+          operation: request.name,
+        }),
+      );
+      console.log({ output });
+    } catch (error) {
+      throw new Error(`Error triggering PageSpeed Insights Worker (${error})`);
+    }
   }
 
   process(request: {
@@ -62,6 +94,9 @@ export class AppService {
     playlist: { slug: string };
     context: { metadata: { url: string } };
   }) {
+    /**
+     * Deliver to Wiphala
+     */
     void firstValueFrom(
       this.wiphalaService.segue({
         slug: request.playlist.slug,
