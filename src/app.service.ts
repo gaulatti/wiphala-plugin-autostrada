@@ -200,7 +200,7 @@ export class AppService {
     void firstValueFrom(
       this.wiphalaService.segue({
         slug: request.playlist.slug,
-        output: JSON.stringify({ mobile, desktop }),
+        output: JSON.stringify([mobile, desktop]),
         operation: request.name,
       }),
     );
