@@ -50,4 +50,44 @@ function mergeFiles(files: string[]): LighthouseResult {
   return mergedData as LighthouseResult;
 }
 
-export { mergeFiles };
+/**
+ * Groups a list of file paths by their identifier, which is derived from the filename
+ * (the portion before the first dot in the filename).
+ *
+ * @param acc - The accumulator object that stores files grouped by their identifier.
+ *              Keys are identifiers, and values are arrays of file paths.
+ * @param file - The file path to be processed and grouped.
+ * @returns The updated accumulator object with the file grouped under its identifier.
+ */
+const groupFilesById = (acc: Record<string, string[]>, file: string) => {
+  const id = getIdFromFilename(file);
+
+  if (!acc[id]) {
+    acc[id] = [];
+  }
+
+  acc[id].push(file);
+  return acc;
+};
+
+/**
+ * Extracts the ID from a given file path by taking the last segment of the path,
+ * splitting it by the file extension delimiter, and returning the first part.
+ *
+ * @param file - The full file path as a string.
+ * @returns The extracted ID from the filename.
+ *
+ * @example
+ * ```typescript
+ * const id = getIdFromFilename('/path/to/file/12345.txt');
+ * console.log(id); // Output: '12345'
+ * ```
+ */
+const getIdFromFilename = (file: string) => {
+  const filename = file.split('/').pop();
+  const [id] = filename!.split('.');
+
+  return id;
+};
+
+export { getIdFromFilename, groupFilesById, mergeFiles };

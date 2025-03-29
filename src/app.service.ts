@@ -4,8 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { Logger } from 'src/decorators/logger.decorator';
 import { WiphalaService } from 'src/interfaces/wiphala.interface';
 import { JSONLogger } from 'src/utils/logger';
-import { SimplifiedLHResult } from './types/lighthouse';
 import { WorkerRequest, WorkerResponse } from './types/worker';
+import { groupFilesById } from './utils/files';
 import {
   categories,
   mergeOutputFiles,
@@ -97,12 +97,7 @@ export class AppService {
       for (const currentCategory of categories) {
         for (const currentStrategy of strategies) {
           executions.push(
-            runPageSpeedInsights(
-              request.playlist.slug,
-              url,
-              currentCategory,
-              currentStrategy,
-            ),
+            runPageSpeedInsights(url, currentCategory, currentStrategy),
           );
         }
       }
@@ -163,36 +158,23 @@ export class AppService {
     );
 
     /**
-     * Isolating files from output
+     * Groups files by their unique identifier extracted from the filename.
      */
-    const { mobileFiles, desktopFiles }: Record<string, string[]> = (
-      collectedData?.output || []
-    ).reduce(
-      (prev: Record<string, string[]>, current: string) => {
-        if (current.includes('mobile')) {
-          prev.mobileFiles.push(current);
-        } else if (current.includes('desktop')) {
-          prev.desktopFiles.push(current);
-        }
-
-        return prev;
-      },
-      {
-        mobileFiles: [],
-        desktopFiles: [],
-      },
+    const groupedFiles = (collectedData?.output || []).reduce(
+      groupFilesById,
+      {},
     );
 
     /**
      * Merge files accordingly
      */
-    const [mobile, desktop]: {
-      simplifiedFile: SimplifiedLHResult;
-      files: { full: string; min: string };
-    }[] = await Promise.all([
-      mergeOutputFiles(request.playlist.slug, 'mobile', mobileFiles),
-      mergeOutputFiles(request.playlist.slug, 'desktop', desktopFiles),
-    ]);
+    const mergedFiles = await Promise.all(
+      Object.entries(groupedFiles).map(
+        async ([slug, files]: [_id: string, files: string[]]) => {
+          return mergeOutputFiles(slug, files);
+        },
+      ),
+    );
 
     /**
      * Deliver to Wiphala
@@ -200,7 +182,7 @@ export class AppService {
     void firstValueFrom(
       this.wiphalaService.segue({
         slug: request.playlist.slug,
-        output: JSON.stringify([mobile, desktop]),
+        output: JSON.stringify(mergedFiles),
         operation: request.name,
       }),
     );

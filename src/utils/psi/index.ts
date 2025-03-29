@@ -7,6 +7,7 @@ import axios from 'axios';
 import { LighthouseResult, SimplifiedLHResult } from 'src/types/lighthouse';
 import { Readable } from 'stream';
 import { mergeFiles } from '../files';
+import { nanoid } from '../nanoid';
 import { streamToString } from '../s3';
 
 /**
@@ -47,7 +48,6 @@ const API_URL =
  * @throws Will throw an error if the PageSpeed Insights API request fails or if the S3 upload fails.
  */
 const runPageSpeedInsights = async (
-  slug: string,
   url: string,
   category: string,
   strategy: string,
@@ -69,6 +69,7 @@ const runPageSpeedInsights = async (
   /**
    * Upload the data to S3.
    */
+  const slug = nanoid();
   const date = new Date();
   const key = `scans/${date.getUTCFullYear()}/${date.getMonth() + 1}/${slug}.${category}.${strategy}.json`;
 
@@ -99,11 +100,7 @@ const runPageSpeedInsights = async (
  * 3. Uploads the consolidated file to S3 in JSON format.
  * 4. Extracts a simplified summary from the consolidated file and uploads it to S3.
  */
-const mergeOutputFiles = async (
-  slug: string,
-  strategy: 'mobile' | 'desktop',
-  files: string[],
-) => {
+const mergeOutputFiles = async (slug: string, files: string[]) => {
   /**
    * Get all contents for the strategy from S3
    */
@@ -120,7 +117,7 @@ const mergeOutputFiles = async (
   /**
    * Upload to S3 as consolidated file.
    */
-  const basePath = `scans/${date.getUTCFullYear()}/${date.getMonth() + 1}/${slug}.${strategy}`;
+  const basePath = `scans/${date.getUTCFullYear()}/${date.getMonth() + 1}/${slug}`;
   await s3Client.send(
     new PutObjectCommand({
       Bucket: process.env.ASSETS_BUCKET_NAME,
@@ -133,7 +130,7 @@ const mergeOutputFiles = async (
   /**
    * Upload the simplified file to s3.
    */
-  const simplifiedFile = extractLighthouseSummary(mergedFile, strategy);
+  const simplifiedFile = extractLighthouseSummary(mergedFile);
   await s3Client.send(
     new PutObjectCommand({
       Bucket: process.env.ASSETS_BUCKET_NAME,
@@ -145,6 +142,7 @@ const mergeOutputFiles = async (
 
   return {
     simplifiedFile,
+    slug,
     files: { full: `${basePath}.json`, min: `${basePath}.min.json` },
   };
 };
@@ -192,11 +190,9 @@ const getOutputFileFromS3 = async (path: string) => {
  */
 const extractLighthouseSummary = (
   lhReport: LighthouseResult,
-  mode: 'desktop' | 'mobile',
 ): SimplifiedLHResult => {
   const metricsData = lhReport.audits['metrics']?.details?.items?.[0] || {};
   const simplifiedResult: SimplifiedLHResult = {
-    mode,
     lighthouseVersion: lhReport.lighthouseVersion,
     fetchTime: lhReport.fetchTime,
     runWarnings: lhReport.runWarnings || [],

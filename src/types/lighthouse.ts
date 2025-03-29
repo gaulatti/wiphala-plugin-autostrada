@@ -55,7 +55,6 @@ export type LighthouseResult = {
  * diagnostics, opportunities for improvement, and configuration details.
  *
  * @typedef SimplifiedLHResult
- * @property {'desktop' | 'mobile'} mode - The mode in which the Lighthouse audit was run.
  * @property {string} lighthouseVersion - The version of Lighthouse used for the audit.
  * @property {string} fetchTime - The timestamp when the audit was performed.
  * @property {string[]} runWarnings - A list of warnings encountered during the audit.
@@ -98,7 +97,6 @@ export type LighthouseResult = {
  * @property {number} totalAuditTime - The total time taken to perform the audit.
  */
 export type SimplifiedLHResult = {
-  mode: 'desktop' | 'mobile';
   lighthouseVersion: string;
   fetchTime: string;
   runWarnings: string[];
