@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
+import { nanoid } from 'nanoid';
 import { firstValueFrom } from 'rxjs';
 import { Logger } from 'src/decorators/logger.decorator';
 import { WiphalaService } from 'src/interfaces/wiphala.interface';
@@ -94,10 +95,11 @@ export class AppService {
     }
     try {
       const executions: Promise<string>[] = [];
-      for (const currentCategory of categories) {
-        for (const currentStrategy of strategies) {
+      for (const currentStrategy of strategies) {
+        const slug = nanoid();
+        for (const currentCategory of categories) {
           executions.push(
-            runPageSpeedInsights(url, currentCategory, currentStrategy),
+            runPageSpeedInsights(url, slug, currentCategory, currentStrategy),
           );
         }
       }

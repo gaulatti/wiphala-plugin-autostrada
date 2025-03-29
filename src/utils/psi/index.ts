@@ -49,6 +49,7 @@ const API_URL =
  */
 const runPageSpeedInsights = async (
   url: string,
+  slug: string,
   category: string,
   strategy: string,
 ) => {
@@ -69,7 +70,6 @@ const runPageSpeedInsights = async (
   /**
    * Upload the data to S3.
    */
-  const slug = nanoid();
   const date = new Date();
   const key = `scans/${date.getUTCFullYear()}/${date.getMonth() + 1}/${slug}.${category}.${strategy}.json`;
 
