@@ -1,11 +1,11 @@
 # Autostrada Plugin for Wiphala 🚀
 
 ## Introduction  
-The **Autostrada Plugin** is a NestJS-based microservice written in TypeScript that implements advanced functionality for PageSpeed Insights data collection and processing. The plugin is designed to perform specific tasks—collecting and merging Lighthouse reports—while exclusively communicating with the [Wiphala](citeturn0file1) service over gRPC ports. All interactions with Wiphala are achieved through gRPC endpoints defined in the protocol buffers (see the files in the [proto](citeturn0file3) directory). This plugin builds on the fast and efficient Fastify adapter for the REST API layer and utilizes AWS S3 for storage operations.
+The **Autostrada Plugin** is a NestJS-based microservice written in TypeScript that implements advanced functionality for PageSpeed Insights data collection and processing. The plugin is designed to perform specific tasks—collecting and merging Lighthouse reports—while exclusively communicating with the [Wiphala](https://github.com/gaulatti/wiphala) service over gRPC ports. All interactions with Wiphala are achieved through gRPC endpoints defined in the protocol buffers (see the files in the [proto](https://github.com/gaulatti/wiphala-plugin-autostrada/tree/main/src/proto) directory). This plugin builds on the fast and efficient Fastify adapter for the REST API layer and utilizes AWS S3 for storage operations.
 
 ## Features  
 - **gRPC Communication:**  
-  The plugin sends all data exclusively to the Wiphala service through gRPC. When a task is executed, the plugin initializes the gRPC client and calls either the `collect` or `process` method as defined by the incoming payload (citeturn0file5).
+  The plugin sends all data exclusively to the Wiphala service through gRPC. When a task is executed, the plugin initializes the gRPC client and calls either the `collect` or `process` method as defined by the incoming payload.
 
 - **PageSpeed Insights Integration:**  
   Using the Google PageSpeed Insights API, Autostrada fetches performance data for both mobile and desktop strategies. It then uploads raw and merged reports into an AWS S3 bucket.
@@ -77,18 +77,18 @@ Follow these steps to install and get started with the plugin:
    ```bash
    npm run start:prod
    ```  
-   You can also use Docker. A sample `Dockerfile` is provided in the repository (see citeturn0file0), and it exposes the gRPC port dynamically based on the environment settings.
+   You can also use Docker. A sample `Dockerfile` is provided in the repository, and it exposes the gRPC port dynamically based on the environment settings.
 
 ## Usage  
 The plugin listens for Worker requests on the gRPC port as defined in the environment variables. It provides two major functionalities:
 
 - **AutostradaCollect:**  
-  This method triggers a PageSpeed Insights scan for a given URL, collects the resulting JSON outputs for both mobile and desktop strategies, and immediately uploads these raw results to an AWS S3 bucket (citeturn0file1).
+  This method triggers a PageSpeed Insights scan for a given URL, collects the resulting JSON outputs for both mobile and desktop strategies, and immediately uploads these raw results to an AWS S3 bucket.
 
 - **AutostradaProcess:**  
-  This method processes previously collected scan outputs. It isolates mobile and desktop files from a specified sequence, merges these files into a consolidated report, and sends the simplified results back to Wiphala exclusively over gRPC (citeturn0file7).
+  This method processes previously collected scan outputs. It isolates mobile and desktop files from a specified sequence, merges these files into a consolidated report, and sends the simplified results back to Wiphala exclusively over gRPC.
 
-All calls to these methods occur via a single gRPC endpoint—**WiphalaService**. This ensures that every operation’s communication is routed strictly through gRPC ports (see citeturn0file9).
+All calls to these methods occur via a single gRPC endpoint—**WiphalaService**. This ensures that every operation’s communication is routed strictly through gRPC ports.
 
 Here’s an example of how a Worker client might call the service via gRPC:
 ```typescript
@@ -107,13 +107,13 @@ workerService.PerformTask(request)
 The plugin uses different configuration files to manage its build and linting processes:
 
 - **TypeScript Configuration:**  
-  Files such as `tsconfig.json` and `tsconfig.build.json` define the compilation rules (citeturn0file0).
+  Files such as `tsconfig.json` and `tsconfig.build.json` define the compilation rules.
 
 - **NestJS and Microservice Configuration:**  
-  The main module (`app.module.ts`) registers a gRPC client that connects to the Wiphala service using settings provided via environment variables (citeturn0file16).
+  The main module (`app.module.ts`) registers a gRPC client that connects to the Wiphala service using settings provided via environment variables.
 
 - **Network Settings:**  
-  The plugin obtains the gRPC and HTTP port values from environment variables. A utility in `src/utils/network.ts` ensures that the proper local IP and port combinations are used to build the gRPC talkback endpoint (see citeturn0file3 and citeturn0file11).
+  The plugin obtains the gRPC and HTTP port values from environment variables. A utility in `src/utils/network.ts` ensures that the proper local IP and port combinations are used to build the gRPC talkback endpoint.
 
 Any changes to these configurations should be done via environment variables or by modifying the respective configuration files.
 
@@ -130,7 +130,7 @@ Contributions to the Autostrada Plugin are most welcome! If you’d like to cont
    ```
 
 3. **Implement Your Changes:**  
-   Make sure to adhere to the code style and write tests for new functionality. The codebase uses ESLint and Prettier as configured in `.eslint.config.mjs` and `.prettierrc` (citeturn0file6).
+   Make sure to adhere to the code style and write tests for new functionality. The codebase uses ESLint and Prettier as configured in `.eslint.config.mjs` and `.prettierrc`.
 
 4. **Commit Your Changes:**  
    Write clear and descriptive commit messages:
